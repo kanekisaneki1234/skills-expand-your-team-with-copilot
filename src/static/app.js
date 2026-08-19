@@ -519,6 +519,50 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
     `;
 
+    const activityUrl = `${window.location.origin}${
+      window.location.pathname
+    }?activity=${encodeURIComponent(name)}`;
+    const shareText = `Check out the ${name} activity at Mergington High School!`;
+    const encodedShareText = encodeURIComponent(shareText);
+    const encodedActivityUrl = encodeURIComponent(activityUrl);
+    const shareSection = `
+      <div class="share-section">
+        <strong>Share:</strong>
+        <div class="share-buttons">
+          <button class="share-button copy-share" data-share-url="${activityUrl}" data-activity="${name}">
+            Copy Link
+          </button>
+          <a
+            class="share-button social-link"
+            href="https://wa.me/?text=${encodedShareText}%20${encodedActivityUrl}"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Share ${name} on WhatsApp"
+          >
+            WhatsApp
+          </a>
+          <a
+            class="share-button social-link"
+            href="https://twitter.com/intent/tweet?text=${encodedShareText}&url=${encodedActivityUrl}"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Share ${name} on X"
+          >
+            X
+          </a>
+          <a
+            class="share-button social-link"
+            href="https://www.facebook.com/sharer/sharer.php?u=${encodedActivityUrl}"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Share ${name} on Facebook"
+          >
+            Facebook
+          </a>
+        </div>
+      </div>
+    `;
+
     activityCard.innerHTML = `
       ${tagHtml}
       <h4>${name}</h4>
@@ -528,6 +572,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <span class="tooltip-text">Regular meetings at this time throughout the semester</span>
       </p>
       ${capacityIndicator}
+      ${shareSection}
       <div class="participants-list">
         <h5>Current Participants:</h5>
         <ul>
@@ -587,7 +632,31 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+    const copyShareButton = activityCard.querySelector(".copy-share");
+    if (copyShareButton) {
+      copyShareButton.addEventListener("click", handleCopyShareLink);
+    }
+
     activitiesList.appendChild(activityCard);
+  }
+
+  async function handleCopyShareLink(event) {
+    const button = event.currentTarget;
+    const shareUrl = button.dataset.shareUrl;
+    const activityName = button.dataset.activity;
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      showMessage(`Copied ${activityName} link to clipboard.`, "success");
+    } catch (error) {
+      const fallbackInput = document.createElement("input");
+      fallbackInput.value = shareUrl;
+      document.body.appendChild(fallbackInput);
+      fallbackInput.select();
+      document.execCommand("copy");
+      document.body.removeChild(fallbackInput);
+      showMessage(`Copied ${activityName} link to clipboard.`, "success");
+    }
   }
 
   // Event listeners for search and filter
